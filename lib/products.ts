@@ -54,15 +54,6 @@ export const acaiBrProducts: Product[] = [
     hasAdditionals: true,
   },
   {
-    id: "acai-tradicional",
-    name: "AÇAÍ TRADICIONAL",
-    description: "Açaí tradicional batido",
-    price: 0, // Price varies by size
-    image: "/products/tradicional.jpg",
-    category: "sized",
-    hasAdditionals: true,
-  },
-  {
     id: "acai-br-especial",
     name: "AÇAÍ BR ESPECIAL",
     description: "Açaí especial da casa",
@@ -78,11 +69,6 @@ export const productSizes: Record<string, Array<{ value: string; label: string; 
     { value: "330ml", label: "330 ml", price: 14.0 },
     { value: "400ml", label: "400 ml", price: 17.0 },
     { value: "550ml", label: "550 ml", price: 20.0 },
-  ],
-  "acai-tradicional": [
-    { value: "330ml", label: "330 ml", price: 13.0 },
-    { value: "440ml", label: "440 ml", price: 16.0 },
-    { value: "550ml", label: "550 ml", price: 19.0 },
   ],
   "acai-br-especial": [
     { value: "330ml", label: "330 ml", price: 14.0 },
