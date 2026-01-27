@@ -72,7 +72,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<"home" | "orders" | "cart">("home")
-  const [selectedCategory, setSelectedCategory] = useState<"tradicional" | "especial">("tradicional")
+  const [selectedCategory, setSelectedCategory] = useState<"tradicional" | "especial">("especial")
   const [cartItemCount, setCartItemCount] = useState<number>(0)
   
   // Orders history state

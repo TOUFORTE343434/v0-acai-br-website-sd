@@ -11,7 +11,7 @@ import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, 
 import { createClient } from "@/lib/supabase/client"
 import type { Product, ProductSize, Flavor, Addon, Order, StoreSettings } from "@/lib/types"
 import Link from "next/link"
-import { NewOrderNotification } from "@/components/new-order-notification"
+
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -293,7 +293,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <NewOrderNotification order={newOrder} onAccept={handleAcceptOrder} />
       <header className="sticky top-0 z-40 bg-primary text-primary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold">Painel Administrativo</h1>
