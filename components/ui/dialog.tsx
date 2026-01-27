@@ -3,6 +3,7 @@
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -21,7 +22,24 @@ function DialogTrigger({
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  const [portalElement, setPortalElement] = useState<HTMLElement | null>(null)
+
+  useEffect(() => {
+    // Use a dedicated portal container to avoid conflicts
+    let container = document.getElementById('radix-dialog-portal')
+    if (!container) {
+      container = document.createElement('div')
+      container.id = 'radix-dialog-portal'
+      document.body.appendChild(container)
+    }
+    setPortalElement(container)
+  }, [])
+
+  if (!portalElement) {
+    return null
+  }
+
+  return <DialogPrimitive.Portal data-slot="dialog-portal" container={portalElement} {...props} />
 }
 
 function DialogClose({
@@ -55,7 +73,7 @@ function DialogContent({
   showCloseButton?: boolean
 }) {
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
