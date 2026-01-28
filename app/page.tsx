@@ -221,8 +221,6 @@ export default function Home() {
         .insert({
           customer_name: customer.name,
           customer_phone: customer.phone,
-          customer_email: customer.email,
-          customer_cpf: customer.cpf,
           delivery_type: deliveryType,
           address_street: address?.street,
           address_number: address?.number,

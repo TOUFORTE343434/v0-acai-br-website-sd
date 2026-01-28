@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, ArrowLeft, Layers, Cherry } from "lucide-react"
+import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, ArrowLeft, Layers, Cherry, Printer } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import type { Product, ProductSize, Flavor, Addon, Order, StoreSettings } from "@/lib/types"
 import Link from "next/link"
 import { NewOrderNotification } from "@/components/new-order-notification"
+import { ThermalReceipt } from "@/components/thermal-receipt"
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -23,6 +24,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [settings, setSettings] = useState<StoreSettings | null>(null)
   const [newOrder, setNewOrder] = useState<Order | null>(null)
+  const [printOrder, setPrintOrder] = useState<Order | null>(null)
   
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("products")
@@ -294,6 +296,13 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <NewOrderNotification order={newOrder} onAccept={handleAcceptOrder} />
+      {printOrder && (
+        <ThermalReceipt 
+          order={printOrder} 
+          storeName={settings?.store_name || "Açaí BR"}
+          onClose={() => setPrintOrder(null)} 
+        />
+      )}
       <header className="sticky top-0 z-40 bg-primary text-primary-foreground shadow-lg">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold">Painel Administrativo</h1>
@@ -473,6 +482,9 @@ export default function AdminPage() {
                           <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleString("pt-BR")}</p>
                         </div>
                         <div className="flex flex-col gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setPrintOrder(order)}>
+                            <Printer className="h-4 w-4 mr-1" />Imprimir
+                          </Button>
                           <Dialog>
                             <DialogTrigger asChild><Button variant="outline" size="sm"><Eye className="h-4 w-4 mr-1" />Ver</Button></DialogTrigger>
                             <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
