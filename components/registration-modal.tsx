@@ -21,17 +21,44 @@ export function RegistrationModal({ open, onClose }: RegistrationModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    email: "",
-    cpf: "",
   })
+
+  const formatPhone = (value: string) => {
+    // Remove tudo que não é número
+    const numbers = value.replace(/\D/g, "")
+    
+    // Aplica a máscara (XX) XXXXX-XXXX
+    if (numbers.length <= 2) {
+      return numbers.length > 0 ? `(${numbers}` : ""
+    } else if (numbers.length <= 7) {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`
+    } else {
+      return `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7, 11)}`
+    }
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value)
+    setFormData({ ...formData, phone: formatted })
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.name || !formData.phone || !formData.email || !formData.cpf) {
+    if (!formData.name || !formData.phone) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha todos os campos.",
+        description: "Por favor, preencha seu nome e telefone.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validar telefone (mínimo 14 caracteres com máscara)
+    if (formData.phone.length < 14) {
+      toast({
+        title: "Telefone inválido",
+        description: "Por favor, insira um número de telefone válido.",
         variant: "destructive",
       })
       return
@@ -51,7 +78,7 @@ export function RegistrationModal({ open, onClose }: RegistrationModalProps) {
         <DialogHeader>
           <DialogTitle className="text-2xl text-primary">Bem-vindo ao Açaí Br!</DialogTitle>
           <DialogDescription>
-            Para continuar, precisamos de algumas informações para seu primeiro pedido.
+            Para continuar, precisamos de algumas informações para seu pedido.
           </DialogDescription>
         </DialogHeader>
 
@@ -73,31 +100,9 @@ export function RegistrationModal({ open, onClose }: RegistrationModalProps) {
               id="phone"
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              onChange={handlePhoneChange}
               placeholder="(77) 98145-1883"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="seu@email.com"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="cpf">CPF *</Label>
-            <Input
-              id="cpf"
-              value={formData.cpf}
-              onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-              placeholder="000.000.000-00"
+              maxLength={15}
               required
             />
           </div>
