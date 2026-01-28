@@ -142,9 +142,19 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
         alert("Por favor, preencha o endereço de entrega")
         return
       }
-      if (addressMode === "location" && !locationSuccess) {
-        alert("Por favor, compartilhe sua localização ou preencha o endereço manualmente")
-        return
+      if (addressMode === "location") {
+        if (!locationSuccess) {
+          alert("Por favor, compartilhe sua localização ou preencha o endereço manualmente")
+          return
+        }
+        if (!address.number) {
+          alert("Por favor, informe o número da casa")
+          return
+        }
+        if (!address.reference) {
+          alert("Por favor, informe um ponto de referência para facilitar a entrega")
+          return
+        }
       }
     }
     onSubmitOrder(deliveryType, deliveryType === "delivery" ? address : undefined, paymentMethod)
@@ -294,62 +304,86 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
                     )}
                   </div>
                 ) : (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-medium text-green-800">Localização obtida com sucesso!</p>
-                        <p className="text-sm text-green-700 mt-1">{fullAddress}</p>
-                        {address.latitude && address.longitude && (
-                          <a 
-                            href={`https://www.google.com/maps?q=${address.latitude},${address.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-green-600 underline mt-2 inline-block"
-                          >
-                            Ver no Google Maps
-                          </a>
-                        )}
+                  <div className="space-y-4">
+                    {/* Address found from location */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="font-medium text-green-800">Endereço encontrado!</p>
+                          <p className="text-sm text-green-700 mt-1">
+                            {address.street && <span className="font-medium">{address.street}</span>}
+                            {address.neighborhood && <span>, {address.neighborhood}</span>}
+                            {address.city && <span> - {address.city}</span>}
+                          </p>
+                          {address.latitude && address.longitude && (
+                            <a 
+                              href={`https://www.google.com/maps?q=${address.latitude},${address.longitude}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-green-600 underline mt-2 inline-block"
+                            >
+                              Ver no Google Maps
+                            </a>
+                          )}
+                        </div>
                       </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGetLocation}
+                        disabled={loadingLocation}
+                        className="mt-3 bg-transparent"
+                      >
+                        {loadingLocation ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Navigation className="h-4 w-4 mr-2" />
+                        )}
+                        Atualizar Localização
+                      </Button>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleGetLocation}
-                      disabled={loadingLocation}
-                      className="mt-3 bg-transparent"
-                    >
-                      {loadingLocation ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Navigation className="h-4 w-4 mr-2" />
-                      )}
-                      Atualizar Localização
-                    </Button>
-                  </div>
-                )}
 
-                {/* Optional: complement and reference for location mode */}
-                {locationSuccess && (
-                  <div className="space-y-3 pt-2">
-                    <div>
-                      <Label htmlFor="complement-loc">Complemento (opcional)</Label>
-                      <Input
-                        id="complement-loc"
-                        value={address.complement}
-                        onChange={(e) => setAddress({ ...address, complement: e.target.value })}
-                        placeholder="Apto, bloco, casa dos fundos..."
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="reference-loc">Ponto de Referência (opcional)</Label>
-                      <Input
-                        id="reference-loc"
-                        value={address.reference}
-                        onChange={(e) => setAddress({ ...address, reference: e.target.value })}
-                        placeholder="Próximo ao mercado, em frente à praça..."
-                      />
+                    {/* Required fields: house number and reference */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <p className="text-sm font-medium text-amber-800 mb-3">
+                        Complete as informações abaixo para entrega:
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="number-loc" className="text-amber-900">Número da Casa *</Label>
+                          <Input
+                            id="number-loc"
+                            value={address.number}
+                            onChange={(e) => setAddress({ ...address, number: e.target.value })}
+                            placeholder="Ex: 123, S/N"
+                            className="bg-white border-amber-300 focus:border-amber-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="reference-loc" className="text-amber-900">Ponto de Referência *</Label>
+                          <Input
+                            id="reference-loc"
+                            value={address.reference}
+                            onChange={(e) => setAddress({ ...address, reference: e.target.value })}
+                            placeholder="Ex: Próximo ao mercado, casa azul, em frente à praça..."
+                            className="bg-white border-amber-300 focus:border-amber-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="complement-loc" className="text-amber-900">Complemento (opcional)</Label>
+                          <Input
+                            id="complement-loc"
+                            value={address.complement}
+                            onChange={(e) => setAddress({ ...address, complement: e.target.value })}
+                            placeholder="Ex: Apto 201, Bloco B, Casa dos fundos..."
+                            className="bg-white border-amber-300 focus:border-amber-500"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
