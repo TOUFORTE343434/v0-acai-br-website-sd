@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, ArrowLeft, Layers, Cherry, Printer } from "lucide-react"
+import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, ArrowLeft, Layers, Cherry, Printer, Users, Ticket, IceCream } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import type { Product, ProductSize, Flavor, Addon, Order, StoreSettings } from "@/lib/types"
 import Link from "next/link"
@@ -40,6 +40,21 @@ export default function AdminPage() {
   const [addonForm, setAddonForm] = useState({ name: "", price: "" })
   const [editingAddon, setEditingAddon] = useState<Addon | null>(null)
   const [showAddonDialog, setShowAddonDialog] = useState(false)
+
+  // Sabores globais
+  const [globalFlavors, setGlobalFlavors] = useState<{ id: string; name: string; active: boolean }[]>([])
+  const [flavorForm, setFlavorForm] = useState({ name: "" })
+  const [editingFlavor, setEditingFlavor] = useState<{ id: string; name: string; active: boolean } | null>(null)
+  const [showFlavorDialog, setShowFlavorDialog] = useState(false)
+
+  // Clientes
+  const [customers, setCustomers] = useState<{ id: string; name: string; phone: string; orders_count: number; total_spent: number; created_at: string }[]>([])
+
+  // Cupons
+  const [coupons, setCoupons] = useState<{ id: string; code: string; discount_type: string; discount_value: number; min_order: number; active: boolean; expires_at: string | null; usage_count: number }[]>([])
+  const [couponForm, setCouponForm] = useState({ code: "", discount_type: "percentage", discount_value: "", min_order: "0", expires_at: "" })
+  const [editingCoupon, setEditingCoupon] = useState<{ id: string; code: string; discount_type: string; discount_value: number; min_order: number; active: boolean; expires_at: string | null; usage_count: number } | null>(null)
+  const [showCouponDialog, setShowCouponDialog] = useState(false)
   
   const [settingsForm, setSettingsForm] = useState({
     delivery_fee: "6.00",
