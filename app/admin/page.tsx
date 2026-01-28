@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, ArrowLeft, Layers, Cherry, Printer } from "lucide-react"
+import { Plus, Trash2, Edit, Package, Cookie, Settings, ShoppingBag, Eye, Lock, ArrowLeft, Layers, Cherry, Printer, Users, Ticket, IceCream } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import type { Product, ProductSize, Flavor, Addon, Order, StoreSettings } from "@/lib/types"
 import Link from "next/link"
@@ -40,6 +40,21 @@ export default function AdminPage() {
   const [addonForm, setAddonForm] = useState({ name: "", price: "" })
   const [editingAddon, setEditingAddon] = useState<Addon | null>(null)
   const [showAddonDialog, setShowAddonDialog] = useState(false)
+
+  // Sabores globais
+  const [globalFlavors, setGlobalFlavors] = useState<{ id: string; name: string; active: boolean }[]>([])
+  const [flavorForm, setFlavorForm] = useState({ name: "" })
+  const [editingFlavor, setEditingFlavor] = useState<{ id: string; name: string; active: boolean } | null>(null)
+  const [showFlavorDialog, setShowFlavorDialog] = useState(false)
+
+  // Clientes
+  const [customers, setCustomers] = useState<{ id: string; name: string; phone: string; orders_count: number; total_spent: number; created_at: string }[]>([])
+
+  // Cupons
+  const [coupons, setCoupons] = useState<{ id: string; code: string; discount_type: string; discount_value: number; min_order: number; active: boolean; expires_at: string | null; usage_count: number }[]>([])
+  const [couponForm, setCouponForm] = useState({ code: "", discount_type: "percentage", discount_value: "", min_order: "0", expires_at: "" })
+  const [editingCoupon, setEditingCoupon] = useState<{ id: string; code: string; discount_type: string; discount_value: number; min_order: number; active: boolean; expires_at: string | null; usage_count: number } | null>(null)
+  const [showCouponDialog, setShowCouponDialog] = useState(false)
   
   const [settingsForm, setSettingsForm] = useState({
     delivery_fee: "6.00",
@@ -111,6 +126,18 @@ export default function AdminPage() {
       
       const { data: addonsData } = await supabase.from("addons").select("*").order("name")
       if (addonsData) setAddons(addonsData)
+
+      // Carregar sabores globais
+      const { data: flavorsData } = await supabase.from("global_flavors").select("*").order("name")
+      if (flavorsData) setGlobalFlavors(flavorsData)
+
+      // Carregar clientes
+      const { data: customersData } = await supabase.from("customers").select("*").order("created_at", { ascending: false })
+      if (customersData) setCustomers(customersData)
+
+      // Carregar cupons
+      const { data: couponsData } = await supabase.from("coupons").select("*").order("created_at", { ascending: false })
+      if (couponsData) setCoupons(couponsData)
       
       const { data: settingsData } = await supabase.from("store_settings").select("*").single()
       if (settingsData) {
@@ -266,6 +293,79 @@ export default function AdminPage() {
     loadData()
   }
 
+  // CRUD Sabores Globais
+  const saveFlavor = async () => {
+    try {
+      if (editingFlavor) {
+        await supabase.from("global_flavors").update({ name: flavorForm.name }).eq("id", editingFlavor.id)
+      } else {
+        await supabase.from("global_flavors").insert({ name: flavorForm.name })
+      }
+      setShowFlavorDialog(false)
+      setFlavorForm({ name: "" })
+      setEditingFlavor(null)
+      loadData()
+    } catch (error) {
+      console.log("[v0] Error saving flavor:", error)
+      alert("Erro ao salvar sabor")
+    }
+  }
+
+  const deleteFlavor = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este sabor?")) return
+    await supabase.from("global_flavors").delete().eq("id", id)
+    loadData()
+  }
+
+  const toggleFlavorActive = async (id: string, active: boolean) => {
+    await supabase.from("global_flavors").update({ active: !active }).eq("id", id)
+    loadData()
+  }
+
+  // CRUD Cupons
+  const saveCoupon = async () => {
+    try {
+      const couponData = {
+        code: couponForm.code.toUpperCase(),
+        discount_type: couponForm.discount_type,
+        discount_value: parseFloat(couponForm.discount_value),
+        min_order: parseFloat(couponForm.min_order) || 0,
+        expires_at: couponForm.expires_at || null
+      }
+      
+      if (editingCoupon) {
+        await supabase.from("coupons").update(couponData).eq("id", editingCoupon.id)
+      } else {
+        await supabase.from("coupons").insert(couponData)
+      }
+      setShowCouponDialog(false)
+      setCouponForm({ code: "", discount_type: "percentage", discount_value: "", min_order: "0", expires_at: "" })
+      setEditingCoupon(null)
+      loadData()
+    } catch (error) {
+      console.log("[v0] Error saving coupon:", error)
+      alert("Erro ao salvar cupom")
+    }
+  }
+
+  const deleteCoupon = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este cupom?")) return
+    await supabase.from("coupons").delete().eq("id", id)
+    loadData()
+  }
+
+  const toggleCouponActive = async (id: string, active: boolean) => {
+    await supabase.from("coupons").update({ active: !active }).eq("id", id)
+    loadData()
+  }
+
+  // Deletar cliente
+  const deleteCustomer = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este cliente?")) return
+    await supabase.from("customers").delete().eq("id", id)
+    loadData()
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -315,11 +415,14 @@ export default function AdminPage() {
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="products" className="flex items-center gap-2"><Package className="h-4 w-4" /><span className="hidden sm:inline">Produtos</span></TabsTrigger>
-            <TabsTrigger value="addons" className="flex items-center gap-2"><Cookie className="h-4 w-4" /><span className="hidden sm:inline">Adicionais</span></TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" /><span className="hidden sm:inline">Pedidos</span></TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2"><Settings className="h-4 w-4" /><span className="hidden sm:inline">Config</span></TabsTrigger>
+          <TabsList className="flex flex-wrap gap-1 mb-6 h-auto p-1">
+            <TabsTrigger value="products" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><Package className="h-4 w-4" /><span className="hidden sm:inline">Produtos</span></TabsTrigger>
+            <TabsTrigger value="addons" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><Cookie className="h-4 w-4" /><span className="hidden sm:inline">Adicionais</span></TabsTrigger>
+            <TabsTrigger value="flavors" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><IceCream className="h-4 w-4" /><span className="hidden sm:inline">Sabores</span></TabsTrigger>
+            <TabsTrigger value="orders" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><ShoppingBag className="h-4 w-4" /><span className="hidden sm:inline">Pedidos</span></TabsTrigger>
+            <TabsTrigger value="customers" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><Users className="h-4 w-4" /><span className="hidden sm:inline">Clientes</span></TabsTrigger>
+            <TabsTrigger value="coupons" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><Ticket className="h-4 w-4" /><span className="hidden sm:inline">Cupons</span></TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1 text-xs sm:text-sm px-2 py-1.5"><Settings className="h-4 w-4" /><span className="hidden sm:inline">Config</span></TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
@@ -458,6 +561,52 @@ export default function AdminPage() {
             )}
           </TabsContent>
 
+          {/* Aba de Sabores Globais */}
+          <TabsContent value="flavors">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Sabores Globais</h2>
+              <Dialog open={showFlavorDialog} onOpenChange={(open) => { setShowFlavorDialog(open); if (!open) { setFlavorForm({ name: "" }); setEditingFlavor(null) } }}>
+                <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Novo Sabor</Button></DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>{editingFlavor ? "Editar Sabor" : "Novo Sabor"}</DialogTitle></DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div><Label htmlFor="flavor-name">Nome do Sabor</Label><Input id="flavor-name" value={flavorForm.name} onChange={(e) => setFlavorForm({ ...flavorForm, name: e.target.value })} placeholder="Ex: Morango" /></div>
+                    <Button onClick={saveFlavor} className="w-full">{editingFlavor ? "Salvar" : "Criar"}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {loading ? (<p className="text-center py-8 text-muted-foreground">Carregando...</p>) : globalFlavors.length === 0 ? (
+              <Card className="p-8 text-center"><IceCream className="h-12 w-12 mx-auto text-muted-foreground mb-4" /><p className="text-muted-foreground">Nenhum sabor cadastrado</p></Card>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {globalFlavors.map((flavor) => (
+                  <Card key={flavor.id} className={!flavor.active ? "opacity-50" : ""}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3">
+                        <IceCream className="h-5 w-5 text-primary" />
+                        <div>
+                          <h3 className="font-medium">{flavor.name}</h3>
+                          <span className={`text-xs px-2 py-0.5 rounded ${flavor.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                            {flavor.active ? "Ativo" : "Inativo"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => toggleFlavorActive(flavor.id, flavor.active)}>
+                          {flavor.active ? "Desativar" : "Ativar"}
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => { setEditingFlavor(flavor); setFlavorForm({ name: flavor.name }); setShowFlavorDialog(true) }}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="destructive" size="icon" onClick={() => deleteFlavor(flavor.id)}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="orders">
             <h2 className="text-xl font-semibold mb-4">Pedidos</h2>
             {loading ? (<p className="text-center py-8 text-muted-foreground">Carregando...</p>) : orders.length === 0 ? (
@@ -501,6 +650,104 @@ export default function AdminPage() {
                             <option value="pending">Pendente</option><option value="confirmed">Confirmado</option><option value="preparing">Preparando</option><option value="ready">Pronto</option><option value="delivered">Entregue</option><option value="cancelled">Cancelado</option>
                           </select>
                         </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Aba de Clientes */}
+          <TabsContent value="customers">
+            <h2 className="text-xl font-semibold mb-4">Clientes Cadastrados</h2>
+            {loading ? (<p className="text-center py-8 text-muted-foreground">Carregando...</p>) : customers.length === 0 ? (
+              <Card className="p-8 text-center"><Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" /><p className="text-muted-foreground">Nenhum cliente cadastrado</p></Card>
+            ) : (
+              <div className="grid gap-4">
+                {customers.map((customer) => (
+                  <Card key={customer.id}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Users className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{customer.name}</h3>
+                          <p className="text-sm text-muted-foreground">{customer.phone}</p>
+                          <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                            <span>Pedidos: {customer.orders_count}</span>
+                            <span>Total gasto: R$ {customer.total_spent.toFixed(2)}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Cadastro: {new Date(customer.created_at).toLocaleDateString("pt-BR")}</p>
+                        </div>
+                      </div>
+                      <Button variant="destructive" size="icon" onClick={() => deleteCustomer(customer.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Aba de Cupons */}
+          <TabsContent value="coupons">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Cupons de Desconto</h2>
+              <Dialog open={showCouponDialog} onOpenChange={(open) => { setShowCouponDialog(open); if (!open) { setCouponForm({ code: "", discount_type: "percentage", discount_value: "", min_order: "0", expires_at: "" }); setEditingCoupon(null) } }}>
+                <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Novo Cupom</Button></DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>{editingCoupon ? "Editar Cupom" : "Novo Cupom"}</DialogTitle></DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div><Label htmlFor="coupon-code">Codigo do Cupom</Label><Input id="coupon-code" value={couponForm.code} onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })} placeholder="Ex: DESCONTO10" /></div>
+                    <div>
+                      <Label htmlFor="discount-type">Tipo de Desconto</Label>
+                      <select id="discount-type" value={couponForm.discount_type} onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value })} className="w-full border rounded px-3 py-2 mt-1">
+                        <option value="percentage">Porcentagem (%)</option>
+                        <option value="fixed">Valor Fixo (R$)</option>
+                      </select>
+                    </div>
+                    <div><Label htmlFor="discount-value">{couponForm.discount_type === "percentage" ? "Desconto (%)" : "Desconto (R$)"}</Label><Input id="discount-value" type="number" step="0.01" value={couponForm.discount_value} onChange={(e) => setCouponForm({ ...couponForm, discount_value: e.target.value })} placeholder={couponForm.discount_type === "percentage" ? "10" : "5.00"} /></div>
+                    <div><Label htmlFor="min-order">Pedido Minimo (R$)</Label><Input id="min-order" type="number" step="0.01" value={couponForm.min_order} onChange={(e) => setCouponForm({ ...couponForm, min_order: e.target.value })} placeholder="0" /></div>
+                    <div><Label htmlFor="expires-at">Data de Expiracao (opcional)</Label><Input id="expires-at" type="date" value={couponForm.expires_at} onChange={(e) => setCouponForm({ ...couponForm, expires_at: e.target.value })} /></div>
+                    <Button onClick={saveCoupon} className="w-full">{editingCoupon ? "Salvar" : "Criar"}</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {loading ? (<p className="text-center py-8 text-muted-foreground">Carregando...</p>) : coupons.length === 0 ? (
+              <Card className="p-8 text-center"><Ticket className="h-12 w-12 mx-auto text-muted-foreground mb-4" /><p className="text-muted-foreground">Nenhum cupom cadastrado</p></Card>
+            ) : (
+              <div className="grid gap-4">
+                {coupons.map((coupon) => (
+                  <Card key={coupon.id} className={!coupon.active ? "opacity-50" : ""}>
+                    <CardContent className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Ticket className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg">{coupon.code}</h3>
+                          <p className="text-sm text-primary font-medium">
+                            {coupon.discount_type === "percentage" ? `${coupon.discount_value}% de desconto` : `R$ ${coupon.discount_value.toFixed(2)} de desconto`}
+                          </p>
+                          <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                            {coupon.min_order > 0 && <span>Min: R$ {coupon.min_order.toFixed(2)}</span>}
+                            <span>Usos: {coupon.usage_count}</span>
+                            {coupon.expires_at && <span>Expira: {new Date(coupon.expires_at).toLocaleDateString("pt-BR")}</span>}
+                          </div>
+                          <span className={`text-xs px-2 py-0.5 rounded mt-1 inline-block ${coupon.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                            {coupon.active ? "Ativo" : "Inativo"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => toggleCouponActive(coupon.id, coupon.active)}>
+                          {coupon.active ? "Desativar" : "Ativar"}
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={() => { setEditingCoupon(coupon); setCouponForm({ code: coupon.code, discount_type: coupon.discount_type, discount_value: coupon.discount_value.toString(), min_order: coupon.min_order.toString(), expires_at: coupon.expires_at ? coupon.expires_at.split("T")[0] : "" }); setShowCouponDialog(true) }}><Edit className="h-4 w-4" /></Button>
+                        <Button variant="destructive" size="icon" onClick={() => deleteCoupon(coupon.id)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </CardContent>
                   </Card>
