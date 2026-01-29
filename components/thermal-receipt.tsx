@@ -225,7 +225,7 @@ export function ThermalReceipt({ order, storeName = "Açaí BR", onClose }: Ther
 
         <div class="footer">
           <div>Obrigado pela preferência!</div>
-          <div>WhatsApp: (77) 99406-6526</div>
+          <div>WhatsApp: (77) 9940-6526</div>
         </div>
       </body>
       </html>
@@ -369,7 +369,7 @@ export function ThermalReceipt({ order, storeName = "Açaí BR", onClose }: Ther
             {/* Footer */}
             <div className="text-center text-[10px] border-t border-dashed border-black pt-2">
               <div>Obrigado pela preferência!</div>
-              <div>WhatsApp: (77) 99406-6526</div>
+              <div>WhatsApp: (77) 9940-6526</div>
             </div>
           </div>
         </div>

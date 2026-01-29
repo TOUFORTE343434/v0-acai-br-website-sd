@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ onViewMenu }: HeroSectionProps) {
   const openWhatsApp = () => {
-    window.open("https://wa.me/5577994066526", "_blank")
+    window.open("https://wa.me/557799406526", "_blank")
   }
 
   return (

@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS order_item_addons (
 CREATE TABLE IF NOT EXISTS store_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   delivery_fee DECIMAL(10, 2) DEFAULT 6.00,
-  whatsapp_number VARCHAR(50) DEFAULT '5577994066526',
+  whatsapp_number VARCHAR(50) DEFAULT '557799406526',
   store_name VARCHAR(255) DEFAULT 'Açaí BR',
   admin_password VARCHAR(255) DEFAULT 'admin123',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
 
 -- Insert default settings if not exists
 INSERT INTO store_settings (delivery_fee, whatsapp_number, store_name, admin_password)
-SELECT 6.00, '5577994066526', 'Açaí BR', 'admin123'
+SELECT 6.00, '557799406526', 'Açaí BR', 'admin123'
 WHERE NOT EXISTS (SELECT 1 FROM store_settings);
 
 -- Insert sample product (Açaí Tradicional)
