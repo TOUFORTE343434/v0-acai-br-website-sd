@@ -485,8 +485,16 @@ export default function Home() {
                     <div className="text-sm text-muted-foreground">
                       <p>{formatDate(selectedOrder.date)}</p>
                       <p className="mt-1">
-                        {selectedOrder.deliveryType === "pickup" ? "Retirada" : "Entrega"} | {paymentNames[selectedOrder.paymentMethod] || selectedOrder.paymentMethod}
+                        {selectedOrder.deliveryType === "pickup" ? "Retirada na loja" : "Entrega"} | {paymentNames[selectedOrder.paymentMethod] || selectedOrder.paymentMethod}
                       </p>
+                      {selectedOrder.deliveryType === "delivery" && selectedOrder.address && (
+                        <div className="mt-2 p-2 bg-muted/50 rounded">
+                          <p className="font-medium text-foreground">Endereco de entrega:</p>
+                          <p>{selectedOrder.address.street}, {selectedOrder.address.number}</p>
+                          {selectedOrder.address.complement && <p>{selectedOrder.address.complement}</p>}
+                          <p>{selectedOrder.address.neighborhood}</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
