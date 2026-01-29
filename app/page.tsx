@@ -79,16 +79,22 @@ export default function Home() {
   const [myOrders, setMyOrders] = useState<SavedOrder[]>([])
   const [selectedOrder, setSelectedOrder] = useState<SavedOrder | null>(null)
   const [message, setMessage] = useState<string>("")
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Wait for zustand to hydrate from localStorage before showing registration modal
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   useEffect(() => {
-    if (!customer) {
+    if (isHydrated && !customer) {
       setShowRegistration(true)
     }
     loadProducts()
     loadSettings()
     loadMyOrders()
     setCartItemCount(cart.length)
-  }, [customer, cart])
+  }, [customer, cart, isHydrated])
 
   // Listener em tempo real para atualizações de pedidos
   useEffect(() => {
@@ -345,6 +351,18 @@ export default function Home() {
       hour: "2-digit",
       minute: "2-digit",
     })
+  }
+
+  // Show loading while hydrating from localStorage
+  if (!isHydrated) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Image src="/acai-logo.png" alt="Açaí Br" width={80} height={80} className="mx-auto drop-shadow-md animate-pulse" />
+          <p className="mt-4 text-muted-foreground">Carregando...</p>
+        </div>
+      </main>
+    )
   }
 
   return (
