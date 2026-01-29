@@ -273,7 +273,7 @@ export default function Home() {
       }
 
       // Send WhatsApp message
-      const whatsappNumber = storeSettings?.whatsapp_number || "5577981451883"
+      const whatsappNumber = storeSettings?.whatsapp_number || "5577994066526"
       let message = `*Novo Pedido - ${storeSettings?.store_name || "Açaí BR"}*\n\n`
       message += `*Cliente:* ${customer.name}\n`
       message += `*Telefone:* ${customer.phone}\n\n`
@@ -332,7 +332,7 @@ export default function Home() {
   }
 
   const openWhatsApp = () => {
-    const whatsappNumber = storeSettings?.whatsapp_number || "5577981451883"
+    const whatsappNumber = storeSettings?.whatsapp_number || "5577994066526"
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank")
   }
 

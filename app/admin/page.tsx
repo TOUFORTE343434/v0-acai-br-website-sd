@@ -58,7 +58,7 @@ export default function AdminPage() {
   
   const [settingsForm, setSettingsForm] = useState({
     delivery_fee: "6.00",
-    whatsapp_number: "5577981451883",
+    whatsapp_number: "5577994066526",
     store_name: "Açaí BR",
     admin_password: "admin123"
   })
@@ -761,7 +761,7 @@ export default function AdminPage() {
               <CardHeader><CardTitle>Configurações da Loja</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div><Label htmlFor="store-name">Nome da Loja</Label><Input id="store-name" value={settingsForm.store_name} onChange={(e) => setSettingsForm({ ...settingsForm, store_name: e.target.value })} /></div>
-                <div><Label htmlFor="whatsapp">WhatsApp (com código do país)</Label><Input id="whatsapp" value={settingsForm.whatsapp_number} onChange={(e) => setSettingsForm({ ...settingsForm, whatsapp_number: e.target.value })} placeholder="5577981451883" /></div>
+                <div><Label htmlFor="whatsapp">WhatsApp (com código do país)</Label><Input id="whatsapp" value={settingsForm.whatsapp_number} onChange={(e) => setSettingsForm({ ...settingsForm, whatsapp_number: e.target.value })} placeholder="5577994066526" /></div>
                 <div><Label htmlFor="delivery-fee">Taxa de Entrega (R$)</Label><Input id="delivery-fee" type="number" step="0.01" value={settingsForm.delivery_fee} onChange={(e) => setSettingsForm({ ...settingsForm, delivery_fee: e.target.value })} /></div>
                 <div><Label htmlFor="admin-pass">Senha do Admin</Label><Input id="admin-pass" type="password" value={settingsForm.admin_password} onChange={(e) => setSettingsForm({ ...settingsForm, admin_password: e.target.value })} /></div>
                 <Button onClick={saveSettings} className="w-full">Salvar Configurações</Button>

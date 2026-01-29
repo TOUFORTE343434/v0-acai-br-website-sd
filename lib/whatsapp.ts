@@ -1,6 +1,6 @@
 import type { Customer, CartItem } from "./types"
 
-const WHATSAPP_NUMBER = "5577981451883"
+const WHATSAPP_NUMBER = "5577994066526"
 
 export function sendOrderToWhatsApp(
   customer: Customer,
