@@ -80,7 +80,7 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
       if (data && data.address) {
         const addr = data.address
         
-        // Extrair componentes do endereco
+        // Extrair componentes do endereço
         const street = addr.road || addr.pedestrian || addr.street || ""
         const neighborhood = addr.suburb || addr.neighbourhood || addr.district || addr.city_district || ""
         const city = addr.city || addr.town || addr.village || addr.municipality || ""
@@ -102,11 +102,11 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
         setLocationSuccess(true)
         setLocationError("")
       } else {
-        throw new Error("Endereco nao encontrado")
+        throw new Error("Endereço não encontrado")
       }
     } catch (error) {
-      console.error("Erro ao obter endereco:", error)
-      setLocationError("Erro ao obter endereco. Tente novamente ou digite manualmente.")
+      console.error("Erro ao obter endereço:", error)
+      setLocationError("Erro ao obter endereço. Tente novamente ou digite manualmente.")
       setLocationSuccess(false)
     }
   }
@@ -144,7 +144,11 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
             setLocationError("Erro ao obter localização. Tente novamente.")
         }
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { 
+        enableHighAccuracy: true, 
+        timeout: 30000, 
+        maximumAge: 0 
+      }
     )
   }
 
@@ -230,7 +234,7 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Faca o PIX e envie o comprovante junto com o pedido
+                    Faça o PIX e envie o comprovante junto com o pedido
                   </p>
                 </div>
               </div>

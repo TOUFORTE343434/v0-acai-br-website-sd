@@ -489,7 +489,7 @@ export default function Home() {
                       </p>
                       {selectedOrder.deliveryType === "delivery" && selectedOrder.address && (
                         <div className="mt-2 p-2 bg-muted/50 rounded">
-                          <p className="font-medium text-foreground">Endereco de entrega:</p>
+                          <p className="font-medium text-foreground">Endereço de entrega:</p>
                           <p>{selectedOrder.address.street}, {selectedOrder.address.number}</p>
                           {selectedOrder.address.complement && <p>{selectedOrder.address.complement}</p>}
                           <p>{selectedOrder.address.neighborhood}</p>
