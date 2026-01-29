@@ -19,6 +19,8 @@ interface StoreState {
   paymentMethod: string
   storeSettings: StoreSettings | null
   orderFlow: OrderFlowState
+  _hasHydrated: boolean
+  setHasHydrated: (state: boolean) => void
   
   // Customer actions
   setCustomer: (customer: Customer) => void
@@ -60,6 +62,8 @@ const initialOrderFlow: OrderFlowState = {
 const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
+      _hasHydrated: false,
+      setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
       customer: null,
       cart: [],
       deliveryFee: 0,
@@ -211,6 +215,9 @@ const useStore = create<StoreState>()(
     }),
     {
       name: "acai-br-storage",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     },
   ),
 )

@@ -65,6 +65,7 @@ export default function Home() {
   const orderFlow = useStore((state) => state.orderFlow)
   const setStoreSettings = useStore((state) => state.setStoreSettings)
   const storeSettings = useStore((state) => state.storeSettings)
+  const hasHydrated = useStore((state) => state._hasHydrated)
 
   const [showRegistration, setShowRegistration] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
@@ -79,22 +80,22 @@ export default function Home() {
   const [myOrders, setMyOrders] = useState<SavedOrder[]>([])
   const [selectedOrder, setSelectedOrder] = useState<SavedOrder | null>(null)
   const [message, setMessage] = useState<string>("")
-  const [isHydrated, setIsHydrated] = useState(false)
 
-  // Wait for zustand to hydrate from localStorage before showing registration modal
+  // Only show registration modal after hydration AND if no customer exists
   useEffect(() => {
-    setIsHydrated(true)
-  }, [])
-
-  useEffect(() => {
-    if (isHydrated && !customer) {
+    if (hasHydrated && !customer) {
       setShowRegistration(true)
+    } else if (hasHydrated && customer) {
+      setShowRegistration(false)
     }
+  }, [hasHydrated, customer])
+
+  useEffect(() => {
     loadProducts()
     loadSettings()
     loadMyOrders()
     setCartItemCount(cart.length)
-  }, [customer, cart, isHydrated])
+  }, [cart])
 
   // Listener em tempo real para atualizações de pedidos
   useEffect(() => {
@@ -354,7 +355,7 @@ export default function Home() {
   }
 
   // Show loading while hydrating from localStorage
-  if (!isHydrated) {
+  if (!hasHydrated) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
