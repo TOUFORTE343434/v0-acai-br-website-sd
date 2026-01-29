@@ -158,7 +158,7 @@ export function OrderCoupon({ order, onClose, onRefresh }: OrderCouponProps) {
 
               <div className="text-center text-xs text-gray-500 pt-4 border-t border-purple-300">
                 <p>Obrigado pela preferência!</p>
-                <p>WhatsApp: (77) 98145-1883</p>
+                <p>WhatsApp: (77) 99406-6526</p>
               </div>
             </div>
           </div>
