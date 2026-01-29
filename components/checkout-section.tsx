@@ -14,7 +14,7 @@ interface CheckoutSectionProps {
   onSubmitOrder: (deliveryType: "delivery" | "pickup", address?: Address, paymentMethod?: string) => void
 }
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyB8-SLDxLeL6l-7XeKx5rlkAWC3eyArN3w"
+// Usando OpenStreetMap Nominatim API (gratuita, sem necessidade de chave)
 
 export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
   const customer = useStore((state) => state.customer)
@@ -51,36 +51,33 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
     }
   }, [deliveryType, setDeliveryFee, DELIVERY_FEE])
 
-  const getLocationFromGoogle = async (lat: number, lng: number) => {
+  const getAddressFromCoordinates = async (lat: number, lng: number) => {
     try {
+      // Usando Nominatim (OpenStreetMap) - API gratuita
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${GOOGLE_MAPS_API_KEY}`
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=pt-BR`,
+        {
+          headers: {
+            'User-Agent': 'AcaiBR-App/1.0'
+          }
+        }
       )
       const data = await response.json()
       
-      if (data.results && data.results[0]) {
-        const result = data.results[0]
-        setFullAddress(result.formatted_address)
+      if (data && data.address) {
+        const addr = data.address
         
-        // Parse address components
-        const components = result.address_components
-        let street = ""
-        let number = ""
-        let neighborhood = ""
-        let city = ""
-
-        for (const comp of components) {
-          if (comp.types.includes("route")) street = comp.long_name
-          if (comp.types.includes("street_number")) number = comp.long_name
-          if (comp.types.includes("sublocality") || comp.types.includes("sublocality_level_1")) 
-            neighborhood = comp.long_name
-          if (comp.types.includes("administrative_area_level_2") || comp.types.includes("locality")) 
-            city = comp.long_name
-        }
+        // Extrair componentes do endereco
+        const street = addr.road || addr.pedestrian || addr.street || ""
+        const neighborhood = addr.suburb || addr.neighbourhood || addr.district || addr.city_district || ""
+        const city = addr.city || addr.town || addr.village || addr.municipality || ""
+        
+        const fullAddr = [street, neighborhood, city].filter(Boolean).join(", ")
+        setFullAddress(fullAddr || data.display_name || "")
 
         setAddress({
           street: street,
-          number: number,
+          number: "",
           neighborhood: neighborhood,
           city: city,
           complement: "",
@@ -91,10 +88,12 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
         
         setLocationSuccess(true)
         setLocationError("")
+      } else {
+        throw new Error("Endereco nao encontrado")
       }
     } catch (error) {
-      console.error("Error getting address from coords:", error)
-      setLocationError("Erro ao obter endereço. Tente novamente ou digite manualmente.")
+      console.error("Erro ao obter endereco:", error)
+      setLocationError("Erro ao obter endereco. Tente novamente ou digite manualmente.")
       setLocationSuccess(false)
     }
   }
@@ -112,7 +111,7 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords
-        await getLocationFromGoogle(latitude, longitude)
+        await getAddressFromCoordinates(latitude, longitude)
         setLoadingLocation(false)
       },
       (error) => {
