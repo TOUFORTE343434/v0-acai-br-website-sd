@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useStore } from "@/lib/store"
-import { MapPin, Navigation, Truck, Store, CreditCard, Banknote, QrCode, Loader2, CheckCircle2, Edit3 } from "lucide-react"
+import { MapPin, Navigation, Truck, Store, CreditCard, Banknote, QrCode, Loader2, CheckCircle2, Edit3, Copy, Check } from "lucide-react"
 import type { Address } from "@/lib/types"
 
 interface CheckoutSectionProps {
@@ -40,6 +40,19 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
   const [locationError, setLocationError] = useState("")
   const [locationSuccess, setLocationSuccess] = useState(false)
   const [fullAddress, setFullAddress] = useState("")
+  const [pixCopied, setPixCopied] = useState(false)
+
+  const PIX_KEY = "05875802596"
+
+  const handleCopyPix = async () => {
+    try {
+      await navigator.clipboard.writeText(PIX_KEY)
+      setPixCopied(true)
+      setTimeout(() => setPixCopied(false), 2000)
+    } catch (err) {
+      console.error("Erro ao copiar:", err)
+    }
+  }
 
   const DELIVERY_FEE = storeSettings?.delivery_fee || 6.00
 
@@ -184,6 +197,44 @@ export function CheckoutSection({ onSubmitOrder }: CheckoutSectionProps) {
                 <p className="text-sm text-muted-foreground">Pagamento instantâneo</p>
               </div>
             </label>
+            
+            {/* PIX Key Info */}
+            {paymentMethod === "pix" && (
+              <div className="mt-3 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="text-center mb-3">
+                  <p className="text-sm text-muted-foreground">Valor a pagar:</p>
+                  <p className="text-2xl font-bold text-primary">R$ {total.toFixed(2)}</p>
+                </div>
+                <div className="border-t border-primary/20 pt-3">
+                  <p className="text-sm font-medium text-foreground mb-2">Chave PIX (CPF):</p>
+                  <div className="flex items-center gap-2 bg-background p-3 rounded-lg border">
+                    <code className="flex-1 text-lg font-mono font-semibold text-foreground">{PIX_KEY}</code>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCopyPix}
+                      className={`${pixCopied ? "bg-green-100 border-green-500 text-green-700" : ""}`}
+                    >
+                      {pixCopied ? (
+                        <>
+                          <Check className="h-4 w-4 mr-1" />
+                          Copiado!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4 mr-1" />
+                          Copiar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Faca o PIX e envie o comprovante junto com o pedido
+                  </p>
+                </div>
+              </div>
+            )}
             <label className={`flex items-center gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all mt-3 ${paymentMethod === "money" ? "border-primary bg-primary/5" : "border-border"}`}>
               <RadioGroupItem value="money" id="money" />
               <Banknote className="h-5 w-5 text-muted-foreground" />
